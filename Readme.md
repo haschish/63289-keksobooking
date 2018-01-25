@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Дмитрий Рябинин](https://up.htmlacademy.ru/javascript/12/user/63289).
-* Наставник: `Альбина Токарчук`.
+* Наставник: [Альбина Токарчук](https://up.htmlacademy.ru/javascript/12/user/167491).
 
 ---
 
