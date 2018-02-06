@@ -37,6 +37,8 @@ var PHOTOS = [
   'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
   'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
 ];
+var WIDTH_PIN = 50;
+var HEIGHT_PIN = 70;
 
 var getRandomItem = function (array, exclude) {
   if (exclude && exclude.length) {
@@ -119,8 +121,8 @@ var getMapPins = function (data, template) {
   var fragment = document.createDocumentFragment();
   data.forEach(function (item) {
     var clone = template.cloneNode(true);
-    clone.style.left = item.location.x - 25 + 'px';
-    clone.style.top = item.location.y - 70 + 'px';
+    clone.style.left = item.location.x - WIDTH_PIN / 2 + 'px';
+    clone.style.top = item.location.y - HEIGHT_PIN + 'px';
     clone.querySelector('img').src = item.author.avatar;
     fragment.appendChild(clone);
   });
@@ -144,6 +146,7 @@ var getPictures = function (data) {
     var li = document.createElement('li');
     var img = document.createElement('img');
     img.src = item;
+    img.width = 70;
     li.appendChild(img);
     fragment.appendChild(li);
   });
@@ -154,11 +157,12 @@ var getMapCard = function (data, template) {
   var mapCard = template.cloneNode(true);
 
   mapCard.querySelector('h3').textContent = data.offer.title;
+  mapCard.querySelector('small').textContent = data.offer.address;
   mapCard.querySelector('.popup__price').textContent = data.offer.price + '\u20BD/ночь';
-  var h4 = mapCard.querySelector('h4');
-  h4.textContent = MAP_TYPES[data.offer.type];
-  h4.nextElementSibling.textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
-  h4.nextElementSibling.nextElementSibling.textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
+  mapCard.querySelector('h4').textContent = MAP_TYPES[data.offer.type];
+  mapCard.querySelector('p:nth-of-type(4)').textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
+  mapCard.querySelector('p:nth-of-type(4)').textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
+  mapCard.querySelector('p:last-of-type').textContent = data.offer.description;
 
   var features = mapCard.querySelector('.popup__features');
   var newFeatures = features.cloneNode();
@@ -181,7 +185,7 @@ var template = document.querySelector('template').content;
 var templateMapPin = template.querySelector('.map__pin');
 var templateMapCard = template.querySelector('.map__card');
 var testData = generateAds(8);
-var mapCard = getMapCard(testData[0], templateMapCard);
+var mapCard = getMapCard(getRandomItem(testData), templateMapCard);
 
 blockMap.classList.remove('map--faded');
 blockMap.querySelector('.map__pins').appendChild(getMapPins(testData, templateMapPin));
