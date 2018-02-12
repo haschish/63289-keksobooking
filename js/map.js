@@ -9,15 +9,11 @@ var TITLES = [
   'Уютное бунгало далеко от моря',
   'Неуютное бунгало по колено в воде'
 ];
-var TYPES = [
-  'flat',
-  'house',
-  'bungalo'
-];
-var MAP_TYPES = {
-  flat: 'Квартира',
-  house: 'Дом',
-  bungalo: 'Бунгало'
+var TYPES = {
+  flat: {text: 'Квартира', minPrice: 1000},
+  house: {text: 'Дом', minPrice: 5000},
+  bungalo: {text: 'Бунгало', minPrice: 0},
+  palace: {text: 'Дворец', minPrice: 10000}
 };
 var CHECKIN_TIMES = [
   '12:00',
@@ -99,7 +95,7 @@ var generateAds = function (num) {
         title: getRandomItem(TITLES, getValuesOf(data, 'offer.title')),
         address: x + ',' + y,
         price: getRandomPositiveNumber(1000, 1000000),
-        type: getRandomItem(TYPES),
+        type: getRandomItem(Object.keys(TYPES)),
         rooms: getRandomPositiveNumber(1, 5),
         guests: getRandomPositiveNumber(1, 13),
         checkin: getRandomItem(CHECKIN_TIMES),
@@ -161,7 +157,7 @@ var getMapCard = function (data, template) {
   mapCard.querySelector('h3').textContent = data.offer.title;
   mapCard.querySelector('small').textContent = data.offer.address;
   mapCard.querySelector('.popup__price').textContent = data.offer.price + '\u20BD/ночь';
-  mapCard.querySelector('h4').textContent = MAP_TYPES[data.offer.type];
+  mapCard.querySelector('h4').textContent = TYPES[data.offer.type]['text'];
   mapCard.querySelector('p:nth-of-type(4)').textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
   mapCard.querySelector('p:nth-of-type(4)').textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
   mapCard.querySelector('p:last-of-type').textContent = data.offer.description;
@@ -229,13 +225,46 @@ var showMapCard = function (obj) {
   }
 };
 
+var updatePrice = function() {
+  var type = TYPES[noticeFormType.value];
+  noticeFormPrice.min = type.minPrice;
+};
+
+var updateCapacity = function() {
+  var roomNumber = noticeFormRoomNumber.value;
+  var capacity = noticeFormCapacity.value;
+  var currentCapacityOption = noticeFormCapacity.querySelector('option[value="'+capacity+'"]');
+  var errorMessage;
+  var items = noticeFormCapacity.querySelectorAll('option');
+  items.forEach(function (item) {
+    if(roomNumber == 100) {
+      item.disabled = (item.value != 0);
+    } else {
+      item.disabled = (item.value == 0 || item.value > roomNumber);
+    }
+  });
+
+  errorMessage = currentCapacityOption.disabled ? 'Некорректный выбор' : '';
+  noticeFormCapacity.setCustomValidity(errorMessage);
+};
+
+
 
 var blockMap = document.querySelector('.map');
 var mapPinMain = blockMap.querySelector('.map__pin--main');
 var noticeForm = document.querySelector('.notice__form');
 var template = document.querySelector('template').content;
 var testData = generateAds(8);
+var noticeFormType = noticeForm.querySelector('#type');
+var noticeFormPrice = noticeForm.querySelector('#price');
+var noticeFormRoomNumber = noticeForm.querySelector('#room_number');
+var noticeFormCapacity = noticeForm.querySelector('#capacity');
+var noticeFormTimein = noticeForm.querySelector('#timein');
+var noticeFormTimeout = noticeForm.querySelector('#timeout');
+var isFocusTimein = false;
 fillFieldAddress();
+updatePrice();
+updateCapacity();
 
 mapPinMain.addEventListener('mouseup', function () {
   if (blockMap.classList.contains('map--faded')) {
@@ -243,4 +272,23 @@ mapPinMain.addEventListener('mouseup', function () {
     fillFieldAddress();
     fillAds();
   }
+});
+
+noticeFormType.addEventListener('change', function () {
+  updatePrice();
+});
+
+noticeFormRoomNumber.addEventListener('change', function () {
+  updateCapacity();
+});
+
+noticeFormTimein.addEventListener('focus', function () {
+  isFocusTimein = true;
+});
+
+noticeFormTimein.addEventListener('change', function () {
+  noticeFormTimeout.value = noticeFormTimein.value;
+});
+noticeFormTimeout.addEventListener('change', function () {
+  noticeFormTimein.value = noticeFormTimeout.value;
 });
