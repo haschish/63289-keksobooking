@@ -225,29 +225,30 @@ var showMapCard = function (obj) {
   }
 };
 
-var updatePrice = function() {
+var updatePrice = function () {
   var type = TYPES[noticeFormType.value];
   noticeFormPrice.min = type.minPrice;
 };
 
-var updateCapacity = function() {
-  var roomNumber = noticeFormRoomNumber.value;
+var updateCapacity = function () {
+  var roomNumber = parseInt(noticeFormRoomNumber.value, 10);
   var capacity = noticeFormCapacity.value;
-  var currentCapacityOption = noticeFormCapacity.querySelector('option[value="'+capacity+'"]');
+  var currentCapacityOption = noticeFormCapacity.querySelector('option[value="' + capacity + '"]');
   var errorMessage;
   var items = noticeFormCapacity.querySelectorAll('option');
+
   items.forEach(function (item) {
-    if(roomNumber == 100) {
-      item.disabled = (item.value != 0);
+    var value = parseInt(item.value, 10);
+    if (roomNumber === 100) {
+      item.disabled = (value !== 0);
     } else {
-      item.disabled = (item.value == 0 || item.value > roomNumber);
+      item.disabled = (value === 0 || value > roomNumber);
     }
   });
 
   errorMessage = currentCapacityOption.disabled ? 'Некорректный выбор' : '';
   noticeFormCapacity.setCustomValidity(errorMessage);
 };
-
 
 
 var blockMap = document.querySelector('.map');
@@ -261,7 +262,6 @@ var noticeFormRoomNumber = noticeForm.querySelector('#room_number');
 var noticeFormCapacity = noticeForm.querySelector('#capacity');
 var noticeFormTimein = noticeForm.querySelector('#timein');
 var noticeFormTimeout = noticeForm.querySelector('#timeout');
-var isFocusTimein = false;
 fillFieldAddress();
 updatePrice();
 updateCapacity();
@@ -282,13 +282,10 @@ noticeFormRoomNumber.addEventListener('change', function () {
   updateCapacity();
 });
 
-noticeFormTimein.addEventListener('focus', function () {
-  isFocusTimein = true;
-});
-
 noticeFormTimein.addEventListener('change', function () {
   noticeFormTimeout.value = noticeFormTimein.value;
 });
+
 noticeFormTimeout.addEventListener('change', function () {
   noticeFormTimein.value = noticeFormTimeout.value;
 });
