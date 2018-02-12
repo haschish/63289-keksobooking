@@ -39,6 +39,7 @@ var PHOTOS = [
 ];
 var WIDTH_PIN = 50;
 var HEIGHT_PIN = 70;
+var HEIGHT_MAP_PIN_MAIN_TIP = 10;
 
 var getRandomItem = function (array, exclude) {
   if (exclude && exclude.length) {
@@ -119,8 +120,9 @@ var generateAds = function (num) {
 
 var getMapPins = function (data, template) {
   var fragment = document.createDocumentFragment();
-  data.forEach(function (item) {
+  data.forEach(function (item, i) {
     var clone = template.cloneNode(true);
+    clone.dataset.index = i;
     clone.style.left = item.location.x - WIDTH_PIN / 2 + 'px';
     clone.style.top = item.location.y - HEIGHT_PIN + 'px';
     clone.querySelector('img').src = item.author.avatar;
@@ -179,14 +181,66 @@ var getMapCard = function (data, template) {
   return mapCard;
 };
 
+var activate = function () {
+  blockMap.classList.remove('map--faded');
+  noticeForm.classList.remove('notice__form--disabled');
+  blockMap.addEventListener('click', onMapPinClick, true);
+};
+
+var getMapPinMainCoordinate = function () {
+  var x = mapPinMain.offsetLeft;
+  var y = mapPinMain.offsetTop + mapPinMain.clientHeight + HEIGHT_MAP_PIN_MAIN_TIP;
+
+  return [x, y];
+};
+
+var fillFieldAddress = function () {
+  var input = noticeForm.querySelector('#address');
+  input.value = getMapPinMainCoordinate().join(',');
+};
+
+var fillAds = function () {
+  var templateMapPin = template.querySelector('.map__pin');
+  blockMap.querySelector('.map__pins').appendChild(getMapPins(testData, templateMapPin));
+};
+
+var onMapPinClick = function (evt) {
+  var element = evt.target;
+  var classList = element.classList;
+  if (!classList.contains('map__pin')) {
+    element = element.parentElement;
+    classList = element.classList;
+  }
+
+  if (classList.contains('map__pin') && !classList.contains('map__pin--main')) {
+    var obj = testData[parseInt(element.dataset.index, 10)];
+    showMapCard(obj);
+  }
+};
+
+var showMapCard = function (obj) {
+  var templateMapCard = template.querySelector('.map__card');
+  var mapCard = getMapCard(obj, templateMapCard);
+  var lastMapCard = blockMap.querySelector('map__card');
+  if (lastMapCard) {
+    blockMap.replaceChild(mapCard, lastMapCard);
+  } else {
+    blockMap.insertBefore(mapCard, blockMap.querySelector('.map__filters-container'));
+  }
+};
+
 
 var blockMap = document.querySelector('.map');
+var mapPinMain = blockMap.querySelector('.map__pin--main');
+var noticeForm = document.querySelector('.notice__form');
 var template = document.querySelector('template').content;
-var templateMapPin = template.querySelector('.map__pin');
-var templateMapCard = template.querySelector('.map__card');
 var testData = generateAds(8);
-var mapCard = getMapCard(getRandomItem(testData), templateMapCard);
+fillFieldAddress();
 
-blockMap.classList.remove('map--faded');
-blockMap.querySelector('.map__pins').appendChild(getMapPins(testData, templateMapPin));
-blockMap.insertBefore(mapCard, blockMap.querySelector('.map__filters-container'));
+mapPinMain.addEventListener('mouseup', function () {
+  if (blockMap.classList.contains('map--faded')) {
+    activate();
+    fillFieldAddress();
+    fillAds();
+  }
+});
