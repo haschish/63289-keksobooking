@@ -282,6 +282,10 @@ noticeFormRoomNumber.addEventListener('change', function () {
   updateCapacity();
 });
 
+noticeFormCapacity.addEventListener('change', function () {
+  updateCapacity();
+});
+
 noticeFormTimein.addEventListener('change', function () {
   noticeFormTimeout.value = noticeFormTimein.value;
 });
