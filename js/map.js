@@ -12,7 +12,6 @@
   var testData = window.mocks.generateAds(8);
 
 
-
   var getMapPins = function (data, el) {
     var fragment = document.createDocumentFragment();
     data.forEach(function (item, i) {
@@ -127,8 +126,7 @@
   mapPinMain.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
 
-    var dragged = false;
-    var shiftMapPinY = parseInt(mapPinMain.offsetHeight / 2) + HEIGHT_MAP_PIN_MAIN_TIP;
+    var shiftMapPinY = parseInt(mapPinMain.offsetHeight / 2, 10) + HEIGHT_MAP_PIN_MAIN_TIP;
     var minX = 0;
     var maxX = blockMap.offsetWidth;
     var minY = HEIGHT_SKY - shiftMapPinY;
@@ -141,12 +139,10 @@
     };
 
     var onDocumentMousemove = function (moveEvt) {
-      dragged = true;
       var shift = {
         x: moveEvt.clientX - startCoords.x,
         y: moveEvt.clientY - startCoords.y
       };
-      var pinMainCoords = getPinMainCoordinate();
       var nextX = Math.min(Math.max(startCoords.offsetLeft + shift.x, minX), maxX);
       var nextY = Math.min(Math.max(startCoords.offsetTop + shift.y, minY), maxY);
 
@@ -165,7 +161,7 @@
       setAddress();
       document.removeEventListener('mousemove', onDocumentMousemove);
       document.removeEventListener('mouseup', onDocumentMouseup);
-    }
+    };
 
     document.addEventListener('mousemove', onDocumentMousemove);
     document.addEventListener('mouseup', onDocumentMouseup);
