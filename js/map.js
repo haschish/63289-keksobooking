@@ -1,17 +1,25 @@
 'use strict';
 (function () {
+  var WIDTH_PIN = 50;
+  var HEIGHT_PIN = 70;
+  var HEIGHT_MAP_PIN_MAIN_TIP = 10;
+  var HEIGHT_SKY = 140;
+
   var blockMap = document.querySelector('.map');
+  var filterContainer = blockMap.querySelector('.map__filters-container');
   var mapPinMain = blockMap.querySelector('.map__pin--main');
   var template = document.querySelector('template').content;
   var testData = window.mocks.generateAds(8);
+
+
 
   var getMapPins = function (data, el) {
     var fragment = document.createDocumentFragment();
     data.forEach(function (item, i) {
       var clone = el.cloneNode(true);
       clone.dataset.index = i;
-      clone.style.left = item.location.x - window.consts.WIDTH_PIN / 2 + 'px';
-      clone.style.top = item.location.y - window.consts.HEIGHT_PIN + 'px';
+      clone.style.left = item.location.x - WIDTH_PIN / 2 + 'px';
+      clone.style.top = item.location.y - HEIGHT_PIN + 'px';
       clone.querySelector('img').src = item.author.avatar;
       fragment.appendChild(clone);
     });
@@ -75,7 +83,7 @@
 
   var getPinMainCoordinate = function () {
     var x = mapPinMain.offsetLeft;
-    var y = mapPinMain.offsetTop + mapPinMain.clientHeight + window.consts.HEIGHT_MAP_PIN_MAIN_TIP;
+    var y = mapPinMain.offsetTop + mapPinMain.clientHeight + HEIGHT_MAP_PIN_MAIN_TIP;
 
     return [x, y];
   };
@@ -110,15 +118,56 @@
     }
   };
 
+  var setAddress = function () {
+    window.form.setAddress(getPinMainCoordinate().join(','));
+  };
 
-  window.form.setAddress(getPinMainCoordinate().join(','));
+  setAddress();
 
-  mapPinMain.addEventListener('mouseup', function () {
-    if (blockMap.classList.contains('map--faded')) {
-      activate();
-      window.form.activate();
-      window.form.setAddress(getPinMainCoordinate().join(','));
-      fillAds();
+  mapPinMain.addEventListener('mousedown', function (evt) {
+    evt.preventDefault();
+
+    var dragged = false;
+    var shiftMapPinY = parseInt(mapPinMain.offsetHeight / 2) + HEIGHT_MAP_PIN_MAIN_TIP;
+    var minX = 0;
+    var maxX = blockMap.offsetWidth;
+    var minY = HEIGHT_SKY - shiftMapPinY;
+    var maxY = blockMap.offsetHeight - filterContainer.offsetHeight - shiftMapPinY;
+    var startCoords = {
+      x: evt.clientX,
+      y: evt.clientY,
+      offsetLeft: mapPinMain.offsetLeft,
+      offsetTop: mapPinMain.offsetTop
+    };
+
+    var onDocumentMousemove = function (moveEvt) {
+      dragged = true;
+      var shift = {
+        x: moveEvt.clientX - startCoords.x,
+        y: moveEvt.clientY - startCoords.y
+      };
+      var pinMainCoords = getPinMainCoordinate();
+      var nextX = Math.min(Math.max(startCoords.offsetLeft + shift.x, minX), maxX);
+      var nextY = Math.min(Math.max(startCoords.offsetTop + shift.y, minY), maxY);
+
+      mapPinMain.style.left = nextX + 'px';
+      mapPinMain.style.top = nextY + 'px';
+      setAddress();
+    };
+
+    var onDocumentMouseup = function (upEvt) {
+      upEvt.preventDefault();
+      if (blockMap.classList.contains('map--faded')) {
+        activate();
+        window.form.activate();
+        fillAds();
+      }
+      setAddress();
+      document.removeEventListener('mousemove', onDocumentMousemove);
+      document.removeEventListener('mouseup', onDocumentMouseup);
     }
+
+    document.addEventListener('mousemove', onDocumentMousemove);
+    document.addEventListener('mouseup', onDocumentMouseup);
   });
 })();
