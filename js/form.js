@@ -42,6 +42,7 @@
     var formData = new FormData(noticeForm);
     var onSuccess = function () {
       noticeForm.reset();
+      setAddress(window.map.getPinMainCoordinate().join(','));
       window.notifications.success('Данные формы успешно отправлены.');
     };
     var onError = function (msg) {

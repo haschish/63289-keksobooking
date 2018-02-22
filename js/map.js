@@ -171,4 +171,8 @@
     document.addEventListener('mousemove', onDocumentMousemove);
     document.addEventListener('mouseup', onDocumentMouseup);
   });
+
+  window.map = {
+    getPinMainCoordinate: getPinMainCoordinate
+  };
 })();

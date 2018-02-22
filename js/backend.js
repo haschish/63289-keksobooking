@@ -32,7 +32,7 @@
 
   var save = function (data, onLoad, onError) {
     var xhr = createXHR(onLoad, onError);
-    xhr.open('POST', 'https://js.dump.academy/keksobookin');
+    xhr.open('POST', 'https://js.dump.academy/keksobooking');
     xhr.send(data);
   };
 
