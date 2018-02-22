@@ -2,14 +2,14 @@
 (function () {
   var WIDTH_PIN = 50;
   var HEIGHT_PIN = 70;
-  var HEIGHT_MAP_PIN_MAIN_TIP = 10;
+  var HEIGHT_PIN_MAIN_TIP = 10;
   var HEIGHT_SKY = 140;
 
   var blockMap = document.querySelector('.map');
   var filterContainer = blockMap.querySelector('.map__filters-container');
   var mapPinMain = blockMap.querySelector('.map__pin--main');
   var template = document.querySelector('template').content;
-  var testData = window.mocks.generateAds(8);
+  var dataAds = [];
 
 
   var getMapPins = function (data, el) {
@@ -82,14 +82,19 @@
 
   var getPinMainCoordinate = function () {
     var x = mapPinMain.offsetLeft;
-    var y = mapPinMain.offsetTop + mapPinMain.clientHeight + HEIGHT_MAP_PIN_MAIN_TIP;
+    var y = mapPinMain.offsetTop + mapPinMain.clientHeight + HEIGHT_PIN_MAIN_TIP;
 
     return [x, y];
   };
 
   var fillAds = function () {
     var templateMapPin = template.querySelector('.map__pin');
-    blockMap.querySelector('.map__pins').appendChild(getMapPins(testData, templateMapPin));
+    window.backend.loadAds(function (data) {
+      dataAds = data;
+      blockMap.querySelector('.map__pins').appendChild(getMapPins(dataAds, templateMapPin));
+    }, function (msg) {
+      window.notifications.error(msg);
+    });
   };
 
   var onMapPinClick = function (evt) {
@@ -101,7 +106,7 @@
     }
 
     if (classList.contains('map__pin') && !classList.contains('map__pin--main')) {
-      var obj = testData[parseInt(element.dataset.index, 10)];
+      var obj = dataAds[parseInt(element.dataset.index, 10)];
       showMapCard(obj);
     }
   };
@@ -126,7 +131,7 @@
   mapPinMain.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
 
-    var shiftMapPinY = parseInt(mapPinMain.offsetHeight / 2, 10) + HEIGHT_MAP_PIN_MAIN_TIP;
+    var shiftMapPinY = parseInt(mapPinMain.offsetHeight / 2, 10) + HEIGHT_PIN_MAIN_TIP;
     var minX = 0;
     var maxX = blockMap.offsetWidth;
     var minY = HEIGHT_SKY - shiftMapPinY;
