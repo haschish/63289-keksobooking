@@ -854,3 +854,26 @@ textarea:focus
 {
     background-position: -10px -10px;
 }
+
+.notifications {
+  position: fixed;
+  width: 300px;
+  top: 0px;
+  bottom: 0px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column-reverse;
+}
+.notifications__item {
+  margin: 10px 0;
+  padding: 10px;
+  max-height: 300px;
+  color: white;
+}
+.notifications__item_error {
+  background-color: rgba(254, 86, 53, .8);
+}
+.notifications__item_success {
+  background-color: rgba(67, 182, 44, 0.8);
+}

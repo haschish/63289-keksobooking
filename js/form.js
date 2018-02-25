@@ -37,6 +37,19 @@
     noticeForm.classList.remove('notice__form--disabled');
   };
 
+  noticeForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    var formData = new FormData(noticeForm);
+    var onSuccess = function () {
+      noticeForm.reset();
+      setAddress(window.map.getPinMainCoordinate().join(','));
+      window.notifications.success('Данные формы успешно отправлены.');
+    };
+    var onError = function (msg) {
+      window.notifications.error(msg);
+    };
+    window.backend.save(formData, onSuccess, onError);
+  });
 
   noticeFormType.addEventListener('change', function () {
     updatePrice();
