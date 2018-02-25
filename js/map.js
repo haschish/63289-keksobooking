@@ -89,12 +89,15 @@
 
   var fillAds = function () {
     var templateMapPin = template.querySelector('.map__pin');
-    window.backend.loadAds(function (data) {
+    var onLoad = function (data) {
       dataAds = data;
       blockMap.querySelector('.map__pins').appendChild(getMapPins(dataAds, templateMapPin));
-    }, function (msg) {
+    };
+    var onError = function (msg) {
       window.notifications.error(msg);
-    });
+    };
+
+    window.backend.loadAds(onLoad, onError);
   };
 
   var onMapPinClick = function (evt) {
@@ -114,7 +117,7 @@
   var showMapCard = function (obj) {
     var templateMapCard = template.querySelector('.map__card');
     var mapCard = getMapCard(obj, templateMapCard);
-    var lastMapCard = blockMap.querySelector('map__card');
+    var lastMapCard = blockMap.querySelector('.map__card');
     if (lastMapCard) {
       blockMap.replaceChild(mapCard, lastMapCard);
     } else {
