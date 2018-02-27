@@ -4,12 +4,21 @@
   var HEIGHT_PIN = 70;
   var HEIGHT_PIN_MAIN_TIP = 10;
   var HEIGHT_SKY = 140;
+  var MAX_PINS = 5;
+  var ANY = 'any';
+  var Price = {
+    LOW: 'low',
+    MIDDLE: 'middle',
+    HIGH: 'high'
+  };
 
   var blockMap = document.querySelector('.map');
   var filterContainer = blockMap.querySelector('.map__filters-container');
+  var mapFilters = filterContainer.querySelector('form');
   var mapPinMain = blockMap.querySelector('.map__pin--main');
   var template = document.querySelector('template').content;
   var dataAds = [];
+  var filteredAds = [];
 
 
   var getMapPins = function (data, el) {
@@ -56,7 +65,7 @@
     mapCard.querySelector('small').textContent = data.offer.address;
     mapCard.querySelector('.popup__price').textContent = data.offer.price + '\u20BD/ночь';
     mapCard.querySelector('h4').textContent = window.consts.TYPES[data.offer.type]['text'];
-    mapCard.querySelector('p:nth-of-type(4)').textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
+    mapCard.querySelector('p:nth-of-type(3)').textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
     mapCard.querySelector('p:nth-of-type(4)').textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
     mapCard.querySelector('p:last-of-type').textContent = data.offer.description;
 
@@ -87,17 +96,80 @@
     return [x, y];
   };
 
-  var fillAds = function () {
-    var templateMapPin = template.querySelector('.map__pin');
+  var loadAds = function () {
     var onLoad = function (data) {
       dataAds = data;
-      blockMap.querySelector('.map__pins').appendChild(getMapPins(dataAds, templateMapPin));
+      renderAds();
     };
     var onError = function (msg) {
       window.notifications.error(msg);
     };
 
     window.backend.loadAds(onLoad, onError);
+  };
+
+  var isMatchHousingType = function (formValue, type) {
+    return formValue === ANY || formValue === type;
+  };
+
+  var isMatchHoustingPrice = function (formValue, price) {
+    var match = true;
+    switch (formValue) {
+      case Price.LOW: match = price < 10000; break;
+      case Price.MIDDLE: match = price >= 10000 && price < 50000; break;
+      case Price.HIGH: match = price >= 50000; break;
+    }
+
+    return match;
+  };
+
+  var isMatchHousingRooms = function (formValue, rooms) {
+    return formValue === ANY || parseInt(formValue, 10) === rooms;
+  };
+
+  var isMatchHousingGuests = function (formValue, guests) {
+    return formValue === ANY || parseInt(formValue, 10) <= guests;
+  };
+
+  var isMatchFeatures = function (formValue, features) {
+    var match = true;
+    if (formValue.length > 0) {
+      match = formValue.every(function (item) {
+        return features.indexOf(item) !== -1;
+      });
+    }
+
+    return match;
+  };
+
+  var renderAds = function () {
+    var mapPinsEl = blockMap.querySelector('.map__pins');
+    var pins = mapPinsEl.querySelectorAll('.map__pin:not(.map__pin--main)');
+    var templateMapPin = template.querySelector('.map__pin');
+    var formData = getMapFilterData();
+    filteredAds = dataAds.slice(0).filter(function (item) {
+      return isMatchHousingType(formData['housing-type'], item.offer.type) &&
+        isMatchHoustingPrice(formData['housing-price'], item.offer.price) &&
+        isMatchHousingRooms(formData['housing-rooms'], item.offer.rooms) &&
+        isMatchHousingGuests(formData['housing-guests'], item.offer.guests) &&
+        isMatchFeatures(formData.features, item.offer.features);
+    }).slice(0, MAX_PINS);
+    pins.forEach(function (pin) {
+      mapPinsEl.removeChild(pin);
+    });
+    mapPinsEl.appendChild(getMapPins(filteredAds, templateMapPin));
+  };
+
+  var getMapFilterData = function () {
+    var data = {features: []};
+    mapFilters.querySelectorAll('select').forEach(function (item) {
+      data[item.name] = item.value;
+    });
+    mapFilters.querySelectorAll('input:checked').forEach(function (item) {
+      data.features.push(item.value);
+    });
+
+    return data;
   };
 
   var onMapPinClick = function (evt) {
@@ -109,7 +181,7 @@
     }
 
     if (classList.contains('map__pin') && !classList.contains('map__pin--main')) {
-      var obj = dataAds[parseInt(element.dataset.index, 10)];
+      var obj = filteredAds[parseInt(element.dataset.index, 10)];
       showMapCard(obj);
     }
   };
@@ -125,11 +197,23 @@
     }
   };
 
+  var hideMapCard = function () {
+    var mapCard = blockMap.querySelector('.map__card');
+    if (mapCard) {
+      mapCard.hidden = true;
+    }
+  };
+
   var setAddress = function () {
     window.form.setAddress(getPinMainCoordinate().join(','));
   };
 
-  setAddress();
+  var onChangeMapFilters = window.utils.debounce(function () {
+    hideMapCard();
+    renderAds();
+  }, 500);
+
+  mapFilters.addEventListener('change', onChangeMapFilters);
 
   mapPinMain.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
@@ -164,7 +248,7 @@
       if (blockMap.classList.contains('map--faded')) {
         activate();
         window.form.activate();
-        fillAds();
+        loadAds();
       }
       setAddress();
       document.removeEventListener('mousemove', onDocumentMousemove);
@@ -175,6 +259,7 @@
     document.addEventListener('mouseup', onDocumentMouseup);
   });
 
+  setAddress();
   window.map = {
     getPinMainCoordinate: getPinMainCoordinate
   };
