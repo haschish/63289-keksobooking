@@ -43,7 +43,18 @@
     return Math.random() - 0.5;
   };
 
+  var debounce = function (fun, ms) {
+    var timer;
+    return function () {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(fun, ms);
+    };
+  };
+
   window.utils = {
+    debounce: debounce,
     getRandomItem: getRandomItem,
     getValuesOf: getValuesOf,
     getRandomPositiveNumber: getRandomPositiveNumber,
