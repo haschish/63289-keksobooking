@@ -1,5 +1,9 @@
 'use strict';
 (function () {
+  var ClassName = {
+    DEACTIVATED: 'notice__form--disabled'
+  };
+
   var noticeForm = document.querySelector('.notice__form');
   var noticeFormType = noticeForm.querySelector('#type');
   var noticeFormPrice = noticeForm.querySelector('#price');
@@ -7,10 +11,12 @@
   var noticeFormCapacity = noticeForm.querySelector('#capacity');
   var noticeFormTimein = noticeForm.querySelector('#timein');
   var noticeFormTimeout = noticeForm.querySelector('#timeout');
+
   var updatePrice = function () {
     var type = window.consts.TYPES[noticeFormType.value];
     noticeFormPrice.min = type.minPrice;
   };
+
   var updateCapacity = function () {
     var roomNumber = parseInt(noticeFormRoomNumber.value, 10);
     var capacity = noticeFormCapacity.value;
@@ -30,11 +36,21 @@
     errorMessage = currentCapacityOption.disabled ? 'Некорректный выбор' : '';
     noticeFormCapacity.setCustomValidity(errorMessage);
   };
+
   var setAddress = function (value) {
     noticeForm.querySelector('#address').value = value;
   };
+
   var activate = function () {
-    noticeForm.classList.remove('notice__form--disabled');
+    noticeForm.classList.remove(ClassName.DEACTIVATED);
+  };
+
+  var deactivate = function () {
+    noticeForm.classList.add(ClassName.DEACTIVATED);
+    window.map.deactivate();
+    setTimeout(function () {
+      setAddress(window.map.getPinMainCoordinate().join(','));
+    }, 0);
   };
 
   noticeForm.addEventListener('submit', function (evt) {
@@ -42,13 +58,16 @@
     var formData = new FormData(noticeForm);
     var onSuccess = function () {
       noticeForm.reset();
-      setAddress(window.map.getPinMainCoordinate().join(','));
-      window.notifications.success('Данные формы успешно отправлены.');
+      deactivate();
     };
     var onError = function (msg) {
       window.notifications.error(msg);
     };
     window.backend.save(formData, onSuccess, onError);
+  });
+
+  noticeForm.addEventListener('reset', function () {
+    deactivate();
   });
 
   noticeFormType.addEventListener('change', function () {
@@ -76,6 +95,7 @@
 
   window.form = {
     setAddress: setAddress,
-    activate: activate
+    activate: activate,
+    deactivate: deactivate
   };
 })();

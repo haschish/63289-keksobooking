@@ -414,7 +414,7 @@ textarea:focus
     font-size: 14px;
 
     position: absolute;
-    z-index: 2;
+    z-index: 101;
     top: 150px;
     left: 20px;
 
