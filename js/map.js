@@ -6,13 +6,11 @@
   var HEIGHT_SKY = 140;
   var MAX_PINS = 5;
   var ANY = 'any';
+  var DEACTIVATED_CLASS = 'map--faded';
   var Price = {
     LOW: 'low',
     MIDDLE: 'middle',
     HIGH: 'high'
-  };
-  var ClassName = {
-    DEACTIVATED: 'map--faded'
   };
 
   var blockMap = document.querySelector('.map');
@@ -40,7 +38,7 @@
   };
 
   var activate = function () {
-    blockMap.classList.remove(ClassName.DEACTIVATED);
+    blockMap.classList.remove(DEACTIVATED_CLASS);
     blockMap.addEventListener('click', onMapPinClick, true);
     setDisabledFilters(true);
   };
@@ -48,14 +46,14 @@
   var deactivate = function () {
     removeAllPins();
     setPinMainPosition(mapPinMain.initialOffsetLeft, mapPinMain.initialOffsetTop);
-    blockMap.classList.add(ClassName.DEACTIVATED);
+    blockMap.classList.add(DEACTIVATED_CLASS);
     blockMap.removeEventListener('click', onMapPinClick);
     window.adCard.hide();
     setDisabledFilters(true);
   };
 
   var isDeactivated = function () {
-    return blockMap.classList.contains(ClassName.DEACTIVATED);
+    return blockMap.classList.contains(DEACTIVATED_CLASS);
   };
 
   var setDisabledFilters = function (value) {

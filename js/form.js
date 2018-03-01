@@ -1,8 +1,6 @@
 'use strict';
 (function () {
-  var ClassName = {
-    DEACTIVATED: 'notice__form--disabled'
-  };
+  var DEACTIVATED_CLASS = 'notice__form--disabled';
 
   var noticeForm = document.querySelector('.notice__form');
   var noticeFormType = noticeForm.querySelector('#type');
@@ -42,11 +40,11 @@
   };
 
   var activate = function () {
-    noticeForm.classList.remove(ClassName.DEACTIVATED);
+    noticeForm.classList.remove(DEACTIVATED_CLASS);
   };
 
   var deactivate = function () {
-    noticeForm.classList.add(ClassName.DEACTIVATED);
+    noticeForm.classList.add(DEACTIVATED_CLASS);
     window.map.deactivate();
     setTimeout(function () {
       setAddress(window.map.getPinMainCoordinate().join(','));

@@ -45,10 +45,6 @@
     closeButton.removeEventListener('click', onCloseButtonClick);
   };
 
-  var isHide = function () {
-    return card.hidden;
-  };
-
   var getFeatures = function (data) {
     var fragment = document.createDocumentFragment();
     data.forEach(function (item) {
@@ -96,7 +92,7 @@
 
     card.querySelector('.popup__avatar').src = data.author.avatar;
 
-    if (isHide()) {
+    if (card.hidden) {
       show();
     }
   };
